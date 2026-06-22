@@ -45,9 +45,9 @@
         .l-diario { border-left-color: var(--blue); } .l-online { border-left-color: var(--orange); }
         .l-motor { border-left-color: var(--grey); } .l-familia { border-left-color: var(--red); }
         .l-niños { border-left-color: var(--yellow); } .l-fijos { border-left-color: var(--purple); }
-        .l-manual { border-left-color: #1abc9c; background: #2c3e50; } /* Estilo especial botón manual */
+        .l-manual { border-left-color: #1abc9c; background: #2c3e50; }
 
-        input#monto { width: 100%; background: transparent; border: none; border-bottom: 2px solid #333; color: white; font-size: 2.2em; text-align: center; padding: 10px; margin-bottom: 10px; outline: none; transition: 0.3s; }
+        input#monto { width: 100%; box-sizing: border-box; background: transparent; border: none; border-bottom: 2px solid #333; color: white; font-size: 2.2em; text-align: center; padding: 10px; margin-bottom: 10px; outline: none; transition: 0.3s; }
         input#monto.error { border-bottom-color: var(--red); animation: shake 0.3s; }
         @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-6px); } 75% { transform: translateX(6px); } }
 
@@ -65,12 +65,15 @@
         .hist-monto { text-align: right; font-weight: bold; color: var(--red); }
         .hist-ingreso { color: var(--green) !important; }
 
-        .nav-btns { position: fixed; bottom: 20px; right: 20px; display: flex; gap: 10px; z-index: 90; }
-        .btn-round { background: var(--green); color: black; border: none; width: 50px; height: 50px; border-radius: 25px; font-weight: bold; box-shadow: 0 4px 10px rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; }
-        .btn-config { background: var(--grey); }
+        /* NUEVA NAVEGACIÓN: BOTONES RECTANGULARES GRANDES */
+        .nav-container-rect { position: fixed; bottom: 0; left: 0; width: 100%; background: var(--bg); padding: 10px 12px 20px 12px; z-index: 90; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .btn-rect-lg { background: var(--card); border: none; color: white; padding: 18px; border-radius: 14px; font-size: 1em; font-weight: bold; text-align: center; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.4); outline: none; transition: 0.2s; }
+        .btn-rect-lg:active { background: #333; transform: scale(0.97); }
+        .btn-rect-config { border-bottom: 3px solid var(--grey); }
+        .btn-rect-historial { border-bottom: 3px solid var(--green); }
 
         /* Tu sello medbasha disimulado */
-        .firma { position: fixed; bottom: 10px; left: 15px; font-size: 0.55em; color: #222; pointer-events: none; letter-spacing: 2px; font-weight: bold; }
+        .firma { position: fixed; bottom: 85px; left: 15px; font-size: 0.55em; color: #222; pointer-events: none; letter-spacing: 2px; font-weight: bold; z-index: 85; }
     </style>
 </head>
 <body>
@@ -90,10 +93,10 @@
             <button class="btn l-online" onclick="addGasto('📦 Capricho')">📦 Capricho</button>
         </div>
 
-        <div class="section-title">Vehículos</div>
+        <div class="section-title">Vehículos y Alimentación</div>
         <div class="grid">
             <button class="btn l-motor" onclick="addGasto('⛽ Gasolina')">⛽ Gasolina</button>
-            <button class="btn l-motor" onclick="addGasto('🔧 Mecánico')">🔧 Mecánico</button>
+            <button class="btn l-motor" onclick="addGasto('🛒 Súper')">🛒 Súper</button>
         </div>
 
         <div class="section-title">Familia y Hogar</div>
@@ -104,11 +107,12 @@
 
         <div class="section-title">Recibos e Imprevistos</div>
         <div class="grid">
-            <button class="btn l-fijos" onclick="addGasto('📡 Tlf / Net')">📡 Tlf / Net</button>
+            <button class="btn l-fijos" onclick="addGasto('🌐 Internet')">🌐 Internet</button>
             <button class="btn l-manual" onclick="addGastoManual()">📝 Gasto Manual</button>
         </div>
         
-        <div style="height: 80px;"></div>
+        <!-- Espacio extra abajo para que los botones rectangulares no tapen el contenido -->
+        <div style="height: 120px;"></div>
     </div>
 
     <!-- PANTALLA HISTORIAL -->
@@ -135,9 +139,10 @@
         <button class="btn-save" onclick="iniciarNuevoMes()">🔄 REINICIAR CANTIDAD VIRTUAL</button>
     </div>
 
-    <div class="nav-btns">
-        <button class="btn-round btn-config" onclick="abrirConfig()">⚙️</button>
-        <button class="btn-round" onclick="abrirHistorial()">🕒</button>
+    <!-- NUEVA BARRA DE NAVEGACIÓN COMPACTA CON BOTONES RECTANGULARES GRANDES -->
+    <div class="nav-container-rect">
+        <button class="btn-rect-lg btn-rect-config" onclick="abrirConfig()">⚙️ AJUSTES</button>
+        <button class="btn-rect-lg btn-rect-historial" onclick="abrirHistorial()">🕒 VER LISTA</button>
     </div>
     
     <!-- Tu sello medbasha disimulado -->
@@ -155,15 +160,13 @@
         }
 
         function renderApp() {
-            // Renderizado del saldo
             document.getElementById('total').innerText = balance.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " €";
             
-            // Lógica de avisos dinámicos y cambios de color según el límite
             const panel = document.getElementById('panel-control');
             const textoEstado = document.getElementById('estado-texto');
             const totalEuros = document.getElementById('total');
 
-            panel.className = "dashboard"; // reset
+            panel.className = "dashboard"; 
             totalEuros.style.color = "var(--green)";
             textoEstado.innerText = "DISPONIBLE VIRTUAL";
 
@@ -177,7 +180,6 @@
                 textoEstado.innerText = "⚠️ CASI AL LÍMITE MAXIMO";
             }
 
-            // Renderizado del historial de gastos
             const tbody = document.querySelector('#lista-gastos tbody');
             tbody.innerHTML = "";
             
@@ -213,7 +215,6 @@
             mInput.value = "";
         }
 
-        // Nueva función para añadir un gasto escribiendo el nombre libremente
         function addGastoManual() {
             const mInput = document.getElementById('monto');
             const monto = parseFloat(mInput.value);
@@ -225,7 +226,7 @@
             }
 
             let conceptoPersonalizado = prompt("Introduce el concepto de este gasto:");
-            if (conceptoPersonalizado === null) return; // Si cancela, no hace nada
+            if (conceptoPersonalizado === null) return; 
             if (conceptoPersonalizado.trim() === "") conceptoPersonalizado = "📝 Gasto Manual";
 
             vibrate();
